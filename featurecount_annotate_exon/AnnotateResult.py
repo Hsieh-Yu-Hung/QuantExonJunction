@@ -20,7 +20,10 @@ def parse_args():
 
 # 用 bedtool intersect 做交集
 def insetsect(junction_bed:str, junction_anno:str):
-    command = f"bedtools intersect -b {junction_bed} -a {junction_anno} -loj > {INTERMED_FILE}"
+    command = (
+        f"sed -i -n '/^chr/p' {junction_bed} && "
+        f"bedtools intersect -b {junction_bed} -a {junction_anno} -loj > {INTERMED_FILE}"
+    )
     os.system(command)
 
 # 讀取中繼檔案做資料清洗
