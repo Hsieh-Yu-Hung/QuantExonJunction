@@ -2,7 +2,7 @@
 
 這個小專案用於定量我們 RNA panel 檢測基因的 exon-splicing 定量, 我們把範圍限縮在 40 個基因, 並且只算這些基因最長的 transcript。使用 Featurecount 算 STAR-align 完之後的 BAM 檔, 他會輸出 sample alignment 中所有splicing event的定量表格, 從中我們在使用bedtool intersect交集找出目標基因的 exon, 去計算他們的 splicing events。
 
-* 如果已經準備好 [Target-Exon-Junction BED](#prepare) 且沒有更新, 不用在做一次。
+* 如果已經準備好 [Target-Exon-Junction BED](https://github.com/Hsieh-Yu-Hung/QuantExonJunction?tab=readme-ov-file#-%E5%89%8D%E6%BA%96%E5%82%99-target-exon-junction-bed-prepare) 且沒有更新, 不用在做一次。
 
 ## 安裝軟體
 
@@ -34,7 +34,10 @@ python count_exon_span.py -b <junction.bed> -g <ref_annot.gtf>
 為了後續處理我們想看的 splicing 狀況, 在 featurecount 產生 exon-splicong 定量結果的 BED 檔之後, 我們還要幫她找出來的位置註記 exon 跨度, 這 script 參考 hg19 genome GTF 去計算每一個位置的 exon 跨度, 正常來說我們想看得是 exon 跨度為 1 的 splicing event。最後 data clean up 時會一並篩選。
 
 ### ＊ Step3: 註記 featurecount 結果
-
+```bash
+# --keep 會保留中繼檔, 中繼檔還沒刪掉不符合的 exon-splicing.
+python AnnotateResult.py -b <junction_ExonSpan.bed> -a <Target_Exon_Junction_.bed> -o Annotated_featurecount.xlsx --keep
+```
 
 ### ＊ 前準備 Target-Exon-Junction BED {prepare}
 
@@ -140,3 +143,7 @@ chr1	154163787	154164378	ENST00000271850.7	TPM3	exon2-1	No
 | gene_name          | 基因名稱                             |
 | exon-junction      | exon-junction 註記                   |
 | primer_design      | 手動標註是否為我們設計 primer 的位點 |
+
+
+### **3.  最終 Annotated featurecount table 範例**
+
