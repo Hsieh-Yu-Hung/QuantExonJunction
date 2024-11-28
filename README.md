@@ -3,6 +3,7 @@
 這個小專案用於定量我們 RNA panel 檢測基因的 exon-splicing 定量, 我們把範圍限縮在 40 個基因, 並且只算這些基因最長的 transcript。使用 Featurecount 算 STAR-align 完之後的 BAM 檔, 他會輸出 sample alignment 中所有splicing event的定量表格, 從中我們在使用bedtool intersect交集找出目標基因的 exon, 去計算他們的 splicing events。
 
 * 如果已經準備好 [Target-Exon-Junction BED](https://github.com/Hsieh-Yu-Hung/QuantExonJunction?tab=readme-ov-file#-%E5%89%8D%E6%BA%96%E5%82%99-target-exon-junction-bed-prepare) 且沒有更新, 不用在做一次。
+* 目前的 Target_Exon_Junction_BED 為 `example/input/RNA-Panel_GeneList_ExJ_2024_Nov.bed`
 
 ## 安裝軟體
 
@@ -61,6 +62,29 @@ python Make_Exon_Junction_BED.py \			  # 製作 Exon-junction BED 檔
 
 * 將目標基因最長 transcript 的 exons 製作成 BED 檔, 用於後續的結果交集和定量呈現
 * 將會列出目標基因所有 exon-junction 的定量結果, **手動標示**出哪一些是我們設計 primer 的地方
+
+## 執行範例
+* 使用 example/ 底下的檔案
+* ref_anno.gtf 需要自行下載, 這是 hg19 的 GTF 檔案
+- Step1:
+```bash
+bash featureCount.sh example/input_files/MGT01-STAR_Aligned.out.bam ref_anno.gtf MGT01_feature_count
+# 輸出為 example/output_files/MGT01_feature_count*
+```
+- Step2:
+```bash
+python count_exon_span.py -b example/output_files/MGT01_feature_count.junction.bed -g ref_anno.gtf
+# 輸出為 example/output_files/MGT01_feature_count.junction_ExonSpan.bed
+```
+- Step3:
+```bash
+python AnnotateResult.py \
+ -b example/output_files/MGT01_feature_count.junction_ExonSpan.bed \
+ -a example/input_files/RNA-Panel_GeneList_ExJ_2024_Nov.bed \
+ -o MGT01_Annotated_Feature_count.xlsx --keep
+# 輸出為 example/output_files/MGT01_Annotated_Feature_count.xlsx
+# 以及 example/output_files/annotated_result.tsv
+```
 
 ## 額外說明
 
@@ -147,3 +171,35 @@ chr1	154163787	154164378	ENST00000271850.7	TPM3	exon2-1	No
 
 ### **3.  最終 Annotated featurecount table 範例**
 
+* 輸出範例 (Excel):
+```plaintext
+chr	start	end	transcript_id	gene_name	exon_junction	Panel_Target	fc-chr	fc-start	fc-end	fc-transcript_id	fc-count	exon_span
+chr2	29416788	29419636	ENST00000389048.3	ALK	exon29-28	No	NA	NA	NA	NA	0	NA
+chr2	29419726	29420408	ENST00000389048.3	ALK	exon28-27	No	NA	NA	NA	NA	0	NA
+chr2	29420542	29430037	ENST00000389048.3	ALK	exon27-26	No	NA	NA	NA	NA	0	NA
+chr2	29430138	29432652	ENST00000389048.3	ALK	exon26-25	No	NA	NA	NA	NA	0	NA
+chr2	29432744	29436850	ENST00000389048.3	ALK	exon25-24	No	NA	NA	NA	NA	0	NA
+chr2	29436947	29443572	ENST00000389048.3	ALK	exon24-23	No	NA	NA	NA	NA	0	NA
+chr2	29443701	29445210	ENST00000389048.3	ALK	exon23-22	No	NA	NA	NA	NA	0	NA
+chr2	29445274	29445383	ENST00000389048.3	ALK	exon22-21	No	NA	NA	NA	NA	0	NA
+chr2	29445473	29446208	ENST00000389048.3	ALK	exon21-20	Yes	NA	NA	NA	NA	0	NA
+chr2	29446394	29448327	ENST00000389048.3	ALK	exon20-19	Yes	chr2	29446312	29498275	ENST00000389048.3	21	1
+chr2	29448431	29449788	ENST00000389048.3	ALK	exon19-18	Yes	chr2	29446312	29498275	ENST00000389048.3	11	1
+chr2	29449940	29450440	ENST00000389048.3	ALK	exon18-17	Yes	chr2	29446312	29498275	ENST00000389048.3	171	1
+chr2	29450538	29451750	ENST00000389048.3	ALK	exon17-16	Yes	chr2	29446312	29498275	ENST00000389048.3	1	1
+chr2	29451932	29455170	ENST00000389048.3	ALK	exon16-15	No	chr2	29446312	29498275	ENST00000389048.3	1	1
+chr2	29455314	29456431	ENST00000389048.3	ALK	exon15-14	No	chr2	29446312	29498275	ENST00000389048.3	1	1
+chr2	29456562	29462546	ENST00000389048.3	ALK	exon14-13	No	chr2	29446312	29498275	ENST00000389048.3	1	1
+chr2	29462696	29473971	ENST00000389048.3	ALK	exon13-12	No	chr2	29446312	29498275	ENST00000389048.3	1	1
+chr2	29474133	29497965	ENST00000389048.3	ALK	exon12-11	No	chr2	29446312	29498275	ENST00000389048.3	1	1
+chr2	29498093	29498268	ENST00000389048.3	ALK	exon11-10	Yes	chr2	29446312	29498275	ENST00000389048.3	391	1
+chr2	29498362	29519754	ENST00000389048.3	ALK	exon10-9	Yes	chr2	29498362	29519754	ENST00000389048.3	67	1
+chr2	29519923	29541170	ENST00000389048.3	ALK	exon9-8	No	NA	NA	NA	NA	0	NA
+chr2	29541270	29543617	ENST00000389048.3	ALK	exon8-7	No	NA	NA	NA	NA	0	NA
+chr2	29543748	29551216	ENST00000389048.3	ALK	exon7-6	No	NA	NA	NA	NA	0	NA
+chr2	29551347	29606598	ENST00000389048.3	ALK	exon6-5	No	NA	NA	NA	NA	0	NA
+chr2	29606725	29754781	ENST00000389048.3	ALK	exon5-4	No	NA	NA	NA	NA	0	NA
+chr2	29754982	29917716	ENST00000389048.3	ALK	exon4-3	No	NA	NA	NA	NA	0	NA
+chr2	29917880	29940444	ENST00000389048.3	ALK	exon3-2	No	NA	NA	NA	NA	0	NA
+chr2	29940563	30142859	ENST00000389048.3	ALK	exon2-1	Yes	chr2	29940563	30142859	ENST00000389048.3	20	1
+```
