@@ -23,9 +23,16 @@ def parse_attribute(attribute:str) -> dict:
 # 讀取 junction count bed 檔
 def read_junctions(junction_bed_file:str):
     print(" --> Read and Parsing Junction BED...")
-    jcount_df = pd.read_csv(junction_bed_file, sep="\t", header=None)
     column_names = ["chromosome", "start", "end", "transcript_id", "Count"]
-    jcount_df.columns = column_names
+    jcount_df = pd.read_csv(junction_bed_file, sep="\t", header=None, names=column_names)
+    if jcount_df.empty:
+        print(" --> No junction data found in the input file.")
+        empty_df = pd.DataFrame(columns=column_names)
+        return empty_df
+    # 移除 'transcript_id' 欄位中的 NA/NaN 值
+    jcount_df = jcount_df.dropna(subset=['transcript_id'])
+    # 刪除 transcript_id 開頭不是 'ENS' 的資料, 不然遇到'IGH-.t@-ext'會出 bug
+    jcount_df = jcount_df[jcount_df['transcript_id'].str.startswith('ENS')]
     return jcount_df
 
 # 讀取 GTF 檔
@@ -70,10 +77,13 @@ def main():
     jcount_df = read_junctions(args.bed)
 
     # 讀取 GTF
-    gtf_df = read_gtf(args.gtf)
-
-    # 使用 apply 方法計算 'exon_span'
-    jcount_df['exon_span'] = jcount_df.apply(calculate_exon_span, axis=1, gtf_df=gtf_df)
+    if not jcount_df.empty:
+        gtf_df = read_gtf(args.gtf)
+        # 使用 apply 方法計算 'exon_span'
+        jcount_df['exon_span'] = jcount_df.apply(calculate_exon_span, axis=1, gtf_df=gtf_df)
+    else:
+        jcount_df['exon_span'] = "."
+    print("Exon span distance calculation completed.")
 
     # 輸出
     output_name = args.bed.replace('.bed', '_ExonSpan.bed')

@@ -15,7 +15,6 @@ def parse_args():
     parser.add_argument("-b", "--bed", required=True, help="Input featurecount junction-ExonSpan BED file.")
     parser.add_argument("-a", "--annotation", required=True, help="Input Exon junction annotated BED file.")
     parser.add_argument("-o", "--output", required=True, help="Output Annotated featurecount result table, Excel format.")
-    parser.add_argument("-k", "--keep", action="store_true", help=f"Keep the intermeiate file as \"{INTERMED_FILE}\" ")
     return parser.parse_args()
 
 # 用 bedtool intersect 做交集
@@ -34,8 +33,14 @@ def cleanUpAnnotation(intermed_file:str):
         print(f"Error reading file: {e}\nFile: {intermed_file}")
         exit(1)
 
+    # Fill NA by "."
+    df = df.fillna('.')
+
     # 將 '.' 替換為 -1，然後將 'exon_span' 轉換為數值型別
-    df['exon_span'] = df['exon_span'].replace('.', -1).astype(int)
+    df['exon_span'] = df['exon_span'].replace('.', -1)
+    df['exon_span'] = pd.to_numeric(df['exon_span'], errors='coerce').fillna(-1).astype(int)
+    df['fc-count'] = df['fc-count'].replace('.', 0)
+    df['fc-count'] = pd.to_numeric(df['fc-count'], errors='coerce').fillna(0).astype(int)
 
     # 保留原始 '.' 和等於 1 的資料
     df = df[df['exon_span'] <= 1]
@@ -73,9 +78,8 @@ def main():
     # 輸出
     cleanup_data.to_excel(args.output,index=False)
 
-    # 清除中繼檔
-    if not args.keep:
-        os.system(f"rm {INTERMED_FILE}")
+    # 將 intermediate file 移動至 output 資料夾 
+    os.system(f"mv {INTERMED_FILE} {os.path.dirname(args.bed)}")
 
 if __name__ == "__main__":
     main()
