@@ -1,4 +1,4 @@
-chromosome	start	end	transcript_id	Gene_name	exon_name	ACCUiNPanel	KinaseGene
+#chromosome	start	end	transcript_id	Gene_name	exon_name	ACCUiNPanel	KinaseGene
 chr1	114940482	114940562	ENST00000358465.2	TRIM33	exon20-19	No	No
 chr1	114940612	114942079	ENST00000358465.2	TRIM33	exon19-18	No	No
 chr1	114942231	114944011	ENST00000358465.2	TRIM33	exon18-17	No	No
