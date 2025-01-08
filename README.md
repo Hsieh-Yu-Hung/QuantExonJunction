@@ -3,7 +3,8 @@
 這個小專案用於定量我們 RNA panel 檢測基因的 exon-splicing 定量, 我們把範圍限縮在 40 個基因, 並且只算這些基因最長的 transcript。使用 Featurecount 算 STAR-align 完之後的 BAM 檔, 他會輸出 sample alignment 中所有splicing event的定量表格, 從中我們在使用bedtool intersect交集找出目標基因的 exon, 去計算他們的 splicing events。
 
 * 如果已經準備好 [Target-Exon-Junction BED](https://github.com/Hsieh-Yu-Hung/QuantExonJunction?tab=readme-ov-file#-%E5%89%8D%E6%BA%96%E5%82%99-target-exon-junction-bed-prepare) 且沒有更新, 不用在做一次。
-* 目前的 Target_Exon_Junction_BED 為 `example/input/RNA-Panel_GeneList_ExJ_2024_Nov.bed`
+* 目前的 Target_Exon_Junction_BED 為 `example/input/RNA-Panel_GeneList_ExJ_2025_Jan.bed`
+* 2025-01-08 新增一欄 Kinase Gene 用於近一步篩選
 
 ## 安裝軟體
 
@@ -35,12 +36,13 @@ python count_exon_span.py -b <junction.bed> -g <ref_annot.gtf>
 為了後續處理我們想看的 splicing 狀況, 在 featurecount 產生 exon-splicong 定量結果的 BED 檔之後, 我們還要幫她找出來的位置註記 exon 跨度, 這 script 參考 hg19 genome GTF 去計算每一個位置的 exon 跨度, 正常來說我們想看得是 exon 跨度為 1 的 splicing event。最後 data clean up 時會一並篩選。
 
 ### ＊ Step3: 註記 featurecount 結果
+
 ```bash
 # --keep 會保留中繼檔, 中繼檔還沒刪掉不符合的 exon-splicing.
 python AnnotateResult.py -b <junction_ExonSpan.bed> -a <Target_Exon_Junction_.bed> -o Annotated_featurecount.xlsx --keep
 ```
 
-### ＊ 前準備 Target-Exon-Junction BED {prepare}
+### ＊ 前準備 Target-Exon-Junction BED
 
 1. `Find_Longest_Transcript.py` 挑 GTF
 
@@ -64,19 +66,26 @@ python Make_Exon_Junction_BED.py \			  # 製作 Exon-junction BED 檔
 * 將會列出目標基因所有 exon-junction 的定量結果, **手動標示**出哪一些是我們設計 primer 的地方
 
 ## 執行範例
+
 * 使用 example/ 底下的檔案
 * ref_anno.gtf 需要自行下載, 這是 hg19 的 GTF 檔案
+
 - Step1:
+
 ```bash
 bash featureCount.sh example/input_files/MGT01-STAR_Aligned.out.bam ref_anno.gtf MGT01_feature_count
 # 輸出為 example/output_files/MGT01_feature_count*
 ```
+
 - Step2:
+
 ```bash
 python count_exon_span.py -b example/output_files/MGT01_feature_count.junction.bed -g ref_anno.gtf
 # 輸出為 example/output_files/MGT01_feature_count.junction_ExonSpan.bed
 ```
+
 - Step3:
+
 ```bash
 python AnnotateResult.py \
  -b example/output_files/MGT01_feature_count.junction_ExonSpan.bed \
@@ -168,10 +177,10 @@ chr1	154163787	154164378	ENST00000271850.7	TPM3	exon2-1	No
 | exon-junction      | exon-junction 註記                   |
 | primer_design      | 手動標註是否為我們設計 primer 的位點 |
 
-
 ### **3.  最終 Annotated featurecount table 範例**
 
 * 輸出範例 (Excel):
+
 ```plaintext
 chr	start	end	transcript_id	gene_name	exon_junction	Panel_Target	fc-chr	fc-start	fc-end	fc-transcript_id	fc-count	exon_span
 chr2	29416788	29419636	ENST00000389048.3	ALK	exon29-28	No	NA	NA	NA	NA	0	NA
