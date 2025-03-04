@@ -70,7 +70,7 @@ def main():
     # 製作 exon-junction bed
     tdf_list = list(map(lambda t: make_exon_junction_bed(df, t), tList))
     tdf = pd.concat(tdf_list)
-    tdf = tdf[tdf['chr'].str.startswith('chr')]
+    tdf = tdf[tdf['chromosome'].str.startswith('chr')]
     tdf.to_csv(args.output, sep="\t", index=False, header=False)
 
 if __name__ == "__main__":

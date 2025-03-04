@@ -2,9 +2,10 @@
 
 這個小專案用於定量我們 RNA panel 檢測基因的 exon-splicing 定量, 我們把範圍限縮在 40 個基因, 並且只算這些基因最長的 transcript。使用 Featurecount 算 STAR-align 完之後的 BAM 檔, 他會輸出 sample alignment 中所有splicing event的定量表格, 從中我們在使用bedtool intersect交集找出目標基因的 exon, 去計算他們的 splicing events。
 
-* 如果已經準備好 [Target-Exon-Junction BED](https://github.com/Hsieh-Yu-Hung/QuantExonJunction?tab=readme-ov-file#-%E5%89%8D%E6%BA%96%E5%82%99-target-exon-junction-bed-prepare) 且沒有更新, 不用在做一次。
-* 目前的 Target_Exon_Junction_BED 為 `example/input/RNA-Panel_GeneList_ExJ_2025_Jan.bed`
+* 2025-03-04 加入 Internal Control 基因製作新的 Target-Exon-Junction BED
 * 2025-01-08 新增一欄 Kinase Gene 用於近一步篩選
+* 如果已經準備好 Target-Exon-Junction BED 且沒有更新, 不用在做一次。
+* 目前的 Target_Exon_Junction_BED 為 `prepare_exon_annotation/RNA-Panel_GeneList_ExJ_2025_Feb.bed`
 
 ## 安裝軟體
 
@@ -42,9 +43,16 @@ python count_exon_span.py -b <junction.bed> -g <ref_annot.gtf>
 python AnnotateResult.py -b <junction_ExonSpan.bed> -a <Target_Exon_Junction_.bed> -o Annotated_featurecount.xlsx --keep
 ```
 
-### ＊ 前準備 Target-Exon-Junction BED
+### ＊ ！！前準備 Target-Exon-Junction BED！！
 
-1. `Find_Longest_Transcript.py` 挑 GTF
+1. 複製這個 Repository, 進入到 `prepare_exon_annotation/` 資料夾
+
+   ```
+   git clone git@github.com:Hsieh-Yu-Hung/QuantExonJunction.git
+   cd prepare_exon_annotation
+   ```
+2. 準備 hg19 GTF 檔案 (不包含在這個 Repository)
+3. 使用  `Find_Longest_Transcript.py` 篩選 GTF
 
 ```bash
 python Find_Longest_Transcript.py \			# 挑出最長 transcript, 目標基因的 GTF
@@ -54,7 +62,7 @@ python Find_Longest_Transcript.py \			# 挑出最長 transcript, 目標基因的
  -m							# 輸出最長的 transcript_id - gene_name 對照表
 ```
 
-2. `Make_Exon_Junction_BED.py` 製作出定量目標範圍
+3. 使用  `Make_Exon_Junction_BED.py` 製作出定量目標範圍
 
 ```bash
 python Make_Exon_Junction_BED.py \			  # 製作 Exon-junction BED 檔
@@ -64,6 +72,8 @@ python Make_Exon_Junction_BED.py \			  # 製作 Exon-junction BED 檔
 
 * 將目標基因最長 transcript 的 exons 製作成 BED 檔, 用於後續的結果交集和定量呈現
 * 將會列出目標基因所有 exon-junction 的定量結果, **手動標示**出哪一些是我們設計 primer 的地方
+
+4. 手動加入 `ACCUiNPanel` 和 `KinaseGene` 兩個欄位
 
 ## 執行範例
 
