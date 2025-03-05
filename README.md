@@ -74,6 +74,10 @@ python Make_Exon_Junction_BED.py \			  # 製作 Exon-junction BED 檔
 * 將會列出目標基因所有 exon-junction 的定量結果, **手動標示**出哪一些是我們設計 primer 的地方
 
 4. 手動加入 `ACCUiNPanel` 和 `KinaseGene` 兩個欄位
+5. 製作完之後, 上傳至 GCS, Container 在運行時會自動下載, 路徑：
+```
+gs://accuinbio-core-dev/VEP_hg19_Database/ACCUiN_Panel
+```
 
 ## 執行範例
 
