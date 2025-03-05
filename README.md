@@ -78,6 +78,15 @@ python Make_Exon_Junction_BED.py \			  # 製作 Exon-junction BED 檔
 ```
 gs://accuinbio-core-dev/VEP_hg19_Database/ACCUiN_Panel
 ```
+6. [重要‼️] 更新 `Cloud_JOB_STAR_FUSION_Pipeline` 中的 `main_scripts/step2-STAR_align.sh
+```bash
+# Annotate featurecount result
+python task_scripts/AnnotateResult.py \
+ -b /app/$outdir/Exon_Quant.junction_ExonSpan.bed \
+ -a RNA-Panel_GeneList_ExJ_2025_Feb.bed \    # 換成新製作的 Target Exon BED
+ -o /app/$outdir/Annotated_featurecount.xlsx
+```
+7. [重要‼️] 重新建置`Cloud_JOB_STAR_FUSION_Pipeline`並上傳到存放區
 
 ## 執行範例
 
