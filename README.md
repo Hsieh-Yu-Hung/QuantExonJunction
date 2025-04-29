@@ -2,6 +2,7 @@
 
 這個小專案用於定量我們 RNA panel 檢測基因的 exon-splicing 定量, 我們把範圍限縮在 40 個基因, 並且只算這些基因最長的 transcript。使用 Featurecount 算 STAR-align 完之後的 BAM 檔, 他會輸出 sample alignment 中所有splicing event的定量表格, 從中我們在使用bedtool intersect交集找出目標基因的 exon, 去計算他們的 splicing events。
 
+* 2025-04-29 已更新 Target-Exon-Junction BED, 新增最新檔案的被份, 並在 pipeline 中使用, 避免每次更新都要重新建置
 * 2025-03-04 加入 Internal Control 基因製作新的 Target-Exon-Junction BED
 * 2025-01-08 新增一欄 Kinase Gene 用於近一步篩選
 * 如果已經準備好 Target-Exon-Junction BED 且沒有更新, 不用在做一次。
@@ -87,6 +88,12 @@ python task_scripts/AnnotateResult.py \
  -o /app/$outdir/Annotated_featurecount.xlsx
 ```
 7. [重要‼️] 重新建置`Cloud_JOB_STAR_FUSION_Pipeline`並上傳到存放區
+
+8. [重要⚠️] 檢查製作好的檔案, 若 PCR 放大目標沒有包含在裡面, 則手動加入❗️
+- 因為 GTF 的關係, 有一些基因的 exon junction 和設計有所不同, 以實際上設計的為準❗️
+
+9. 將最新版檔案複製一份為固定名稱, 方便未來更新, 不用再重新建置 STAR Fusion 所有 Images
+- 名稱為 `RNA-Panel_GeneList_ExJ_Implemented.bed` 上傳至 GCS.
 
 ## 執行範例
 
